@@ -1,0 +1,52 @@
+{
+  "zengzi_wise": {
+    "file": "assets/zengzi_wise.png",
+    "width": 366,
+    "height": 784
+  },
+  "zengzi_cleaver": {
+    "file": "assets/zengzi_cleaver.png",
+    "width": 471,
+    "height": 816
+  },
+  "wife_market": {
+    "file": "assets/wife_market.png",
+    "width": 405,
+    "height": 724
+  },
+  "wife_shocked": {
+    "file": "assets/wife_shocked.png",
+    "width": 646,
+    "height": 775
+  },
+  "boy_crying": {
+    "file": "assets/boy_crying.png",
+    "width": 385,
+    "height": 625
+  },
+  "boy_happy": {
+    "file": "assets/boy_happy.png",
+    "width": 515,
+    "height": 605
+  },
+  "pig_happy": {
+    "file": "assets/pig_happy.png",
+    "width": 553,
+    "height": 440
+  },
+  "pig_panicked": {
+    "file": "assets/pig_panicked.png",
+    "width": 551,
+    "height": 483
+  },
+  "village_cottage": {
+    "file": "assets/village_cottage.png",
+    "width": 811,
+    "height": 640
+  },
+  "feast_table": {
+    "file": "assets/feast_table.png",
+    "width": 708,
+    "height": 540
+  }
+}

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Promise &amp; The Pig — A Tale of Zengzi</title>
+  <style>
+    :root {
+      --bg-walnut: #181310;
+      --paper-cream: #f8f1e0;
+      --paper-ochre: #e5d2ad;
+      --ink-dark: #231b15;
+      --cinnabar: #c54830;
+      --gold: #e4ad3c;
+      --indigo: #2c3e5e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(ellipse at center, #2a211b 0%, #14100d 72%, #0c0908 100%);
+      color: var(--paper-cream);
+      font-family: "Georgia", "Palatino Linotype", "Times New Roman", serif;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+
+    #theater {
+      position: relative;
+      width: min(96vw, calc(96vh * 16 / 9));
+      aspect-ratio: 16 / 9;
+      background: var(--paper-cream);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow:
+        0 28px 80px rgba(0, 0, 0, 0.72),
+        0 0 0 2px rgba(244, 232, 206, 0.16),
+        0 0 0 8px rgba(32, 24, 18, 0.9);
+    }
+
+    #stage {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    /* Start Poster Medallion Overlay */
+    #startOverlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding-bottom: 9%;
+      background: radial-gradient(circle at 50% 45%, rgba(28, 20, 14, 0.12) 0%, rgba(22, 16, 11, 0.52) 100%);
+      transition: opacity 0.45s ease, visibility 0.45s ease;
+      z-index: 20;
+    }
+
+    #startOverlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .play-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      background: rgba(250, 243, 226, 0.95);
+      color: var(--ink-dark);
+      padding: 20px 38px 22px;
+      border-radius: 6px;
+      border: 2.5px solid var(--ink-dark);
+      box-shadow:
+        0 14px 36px rgba(18, 12, 8, 0.46),
+        6px 6px 0 rgba(197, 72, 48, 0.85);
+      transform: rotate(-0.8deg);
+    }
+
+    .play-kicker {
+      font-family: "Trebuchet MS", sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 2.4px;
+      text-transform: uppercase;
+      color: var(--cinnabar);
+    }
+
+    #startBtn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--cinnabar);
+      color: #fff9ec;
+      border: 2.5px solid var(--ink-dark);
+      border-radius: 999px;
+      padding: 13px 32px;
+      font-family: "Georgia", serif;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 5px 0 var(--ink-dark);
+      transition: transform 0.14s ease, box-shadow 0.14s ease, background 0.16s ease;
+    }
+
+    #startBtn:hover:not(:disabled) {
+      background: #d85238;
+      transform: translateY(-2px);
+      box-shadow: 0 7px 0 var(--ink-dark);
+    }
+
+    #startBtn:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 var(--ink-dark);
+    }
+
+    #startBtn:disabled {
+      opacity: 0.7;
+      cursor: wait;
+    }
+
+    .play-hint {
+      font-family: "Trebuchet MS", sans-serif;
+      font-size: 12.5px;
+      color: #5b493a;
+      letter-spacing: 0.3px;
+    }
+
+    /* End Replay Pill Overlay */
+    #endOverlay {
+      position: absolute;
+      left: 50%;
+      bottom: 14%;
+      transform: translateX(-50%) translateY(16px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.45s ease, transform 0.45s ease, visibility 0.45s ease;
+      z-index: 18;
+    }
+
+    #endOverlay.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    #replayOverlayBtn {
+      background: var(--paper-cream);
+      color: var(--ink-dark);
+      border: 2.5px solid var(--ink-dark);
+      border-radius: 999px;
+      padding: 11px 28px;
+      font-family: "Georgia", serif;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.42), 0 4px 0 var(--cinnabar);
+      transition: transform 0.15s ease;
+    }
+
+    #replayOverlayBtn:hover {
+      transform: translateY(-2px);
+    }
+
+    /* Floating Paper-Theater Controls */
+    #controlsBar {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px 16px 11px;
+      border-radius: 10px;
+      background: rgba(24, 19, 15, 0.84);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(248, 241, 224, 0.18);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      z-index: 15;
+    }
+
+    #controlsBar.hidden {
+      opacity: 0;
+      transform: translateY(14px);
+      pointer-events: none;
+    }
+
+    #scrubber {
+      position: relative;
+      height: 12px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .track-bg {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 5px;
+      border-radius: 4px;
+      background: rgba(248, 241, 224, 0.22);
+    }
+
+    #progressFill {
+      position: absolute;
+      left: 0;
+      height: 5px;
+      width: 0%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--gold), var(--cinnabar));
+    }
+
+    .chapter-tick {
+      position: absolute;
+      top: 50%;
+      width: 2px;
+      height: 9px;
+      background: rgba(248, 241, 224, 0.55);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    #playhead {
+      position: absolute;
+      top: 50%;
+      left: 0%;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--paper-cream);
+      border: 2.5px solid var(--cinnabar);
+      transform: translate(-50%, -50%);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    .controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .controls-left, .controls-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ctrl-btn {
+      background: rgba(248, 241, 224, 0.1);
+      color: var(--paper-cream);
+      border: 1px solid rgba(248, 241, 224, 0.2);
+      border-radius: 6px;
+      height: 32px;
+      min-width: 34px;
+      padding: 0 10px;
+      font-family: "Trebuchet MS", sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .ctrl-btn:hover {
+      background: rgba(248, 241, 224, 0.22);
+    }
+
+    .ctrl-btn.active {
+      background: var(--cinnabar);
+      border-color: var(--cinnabar);
+      color: #fff9ec;
+    }
+
+    .ctrl-btn.dimmed {
+      opacity: 0.55;
+    }
+
+    #timeDisplay {
+      font-family: "Trebuchet MS", monospace;
+      font-size: 13px;
+      color: rgba(248, 241, 224, 0.88);
+      letter-spacing: 0.4px;
+      min-width: 96px;
+    }
+
+    #actLabel {
+      font-style: italic;
+      font-size: 13.5px;
+      color: var(--gold);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 260px;
+    }
+  </style>
+</head>
+<body>
+  <main id="theater" aria-label="The Promise and The Pig animated short">
+    <canvas id="stage" width="1920" height="1080"></canvas>
+
+    <div id="startOverlay">
+      <div class="play-card">
+        <div class="play-kicker">Hand-Drawn Collage Short Film &bull; Pure JavaScript</div>
+        <button id="startBtn" disabled>
+          <span>&#9654;</span>
+          <span class="btn-label">Preparing Cutouts&hellip;</span>
+        </button>
+        <div class="play-hint">Sound ON recommended &bull; Multi-voice English narration &amp; original score</div>
+      </div>
+    </div>
+
+    <div id="endOverlay">
+      <button id="replayOverlayBtn">&#8634; Watch Again</button>
+    </div>
+
+    <div id="controlsBar">
+      <div id="scrubber" role="slider" aria-label="Timeline scrubber">
+        <div class="track-bg"></div>
+        <div id="progressFill"></div>
+        <div id="playhead"></div>
+      </div>
+      <div class="controls-row">
+        <div class="controls-left">
+          <button id="playPauseBtn" class="ctrl-btn" title="Play / Pause (Space)">&#9654;</button>
+          <button id="restartBtn" class="ctrl-btn" title="Restart (R)">&#8634;</button>
+          <span id="timeDisplay">00:00 / 00:55</span>
+          <span id="actLabel">I. The Quiet Village</span>
+        </div>
+        <div class="controls-right">
+          <button id="ccBtn" class="ctrl-btn active" title="Toggle English Subtitles (C)">CC</button>
+          <button id="muteBtn" class="ctrl-btn" title="Mute / Unmute (M)">&#128266;</button>
+          <button id="fsBtn" class="ctrl-btn" title="Fullscreen (F)">&#x26F6;</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/media_bundle.js"></script>
+  <script src="js/audio_engine.js"></script>
+  <script src="js/collage_gfx.js"></script>
+  <script src="js/scenes.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

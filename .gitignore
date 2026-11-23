@@ -1,0 +1,8 @@
+.edgeone/
+dist/
+raw_art/
+*.zip
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
